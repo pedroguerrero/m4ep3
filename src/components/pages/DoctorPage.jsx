@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, Profiler } from 'react';
 import background from '../../assets/bg-2.jpg';
 import { getDoctors } from '../utils/doctor';
 import Row from '../components/Row';
@@ -12,9 +12,54 @@ export default function DoctorPage() {
   const [isLoading, setIsLoading] = useState(true);
   const { doctors, setDoctors, showModalDoctor, setShowModalDoctor } =
     useContext(DoctorsContext);
+  const [filteredDoctors, setFilteredDoctors] = useState([]);
+
+  const onRenderCallback = (
+    id,
+    phase,
+    actualDuration,
+    baseDuration,
+    startTime,
+    commitTime
+  ) => {
+    console.log(
+      'profiler',
+      id,
+      phase,
+      actualDuration,
+      baseDuration,
+      startTime,
+      commitTime
+    );
+  };
+
+  const filterBySpec = (specialty) => {
+    specialty = specialty
+      .toLowerCase()
+      .replaceAll('á', 'a')
+      .replaceAll('é', 'e')
+      .replaceAll('í', 'i')
+      .replaceAll('ó', 'o')
+      .replaceAll('ú', 'u');
+    const filteredDoctors = doctors.filter((doctor) =>
+      doctor.specialty
+        .toLowerCase()
+        .replaceAll('á', 'a')
+        .replaceAll('é', 'e')
+        .replaceAll('í', 'i')
+        .replaceAll('ó', 'o')
+        .replaceAll('ú', 'u')
+        .includes(specialty)
+    );
+
+    setFilteredDoctors(filteredDoctors);
+
+    return filteredDoctors;
+  };
 
   useEffect(() => {
     if (doctors.length) {
+      setFilteredDoctors(doctors);
       setIsLoading(false);
       return;
     }
@@ -22,13 +67,14 @@ export default function DoctorPage() {
     getDoctors()
       .then((data) => {
         setDoctors(data);
+        setFilteredDoctors(data);
         setIsLoading(false);
       })
       .catch(() => alert('Error al obtener los medicos'));
-  }, [doctors.length, setDoctors]);
+  }, [doctors.length, setDoctors, doctors]);
 
   return (
-    <>
+    <React.Fragment>
       <DoctorModal
         title="Información del Doctor"
         showModal={showModalDoctor}
@@ -67,14 +113,27 @@ export default function DoctorPage() {
               </Container>
             </Row>
 
-            {isLoading ? (
-              <Loading size="5rem" />
-            ) : (
-              <DoctorList doctors={doctors} />
-            )}
+            <Row>
+              <Container className="col-md-4 offset-md-8 text-end">
+                <input
+                  type="text"
+                  className="form-control mb-2"
+                  placeholder="Buscar por especialidad"
+                  onChange={(e) => filterBySpec(e.target.value)}
+                />
+              </Container>
+            </Row>
+
+            <Profiler id="DoctorList" onRender={onRenderCallback}>
+              {isLoading ? (
+                <Loading size="5rem" />
+              ) : (
+                <DoctorList className="mt-5" doctors={filteredDoctors} />
+              )}
+            </Profiler>
           </Container>
         </section>
       </main>
-    </>
+    </React.Fragment>
   );
 }

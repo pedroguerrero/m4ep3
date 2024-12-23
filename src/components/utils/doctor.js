@@ -1,11 +1,14 @@
-import axios from 'axios';
 import docImg from '../../assets/doc-1.png';
 
 export const getDoctors = async () => {
   const specialties = ['Pediatría', 'Cardiología', 'Cirugía', 'Traumatología'];
-  const { data } = await axios.get(
-    'https://jsonplaceholder.typicode.com/users'
-  );
+  const response = await fetch('https://jsonplaceholder.typicode.com/users');
+
+  if (!response.ok) {
+    throw new Error('Error al obtener los medicos');
+  }
+
+  const data = await response.json();
 
   return data.map(({ id, name }) => ({
     id,

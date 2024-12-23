@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, createRef } from 'react';
 import background from '../../assets/bg.jpg';
 import Row from '../components/Row';
 import Modal from '../components/Modal';
@@ -32,12 +32,14 @@ export default function PatientsPage() {
     }
 
     getDoctors()
-      .then((doctors) => setDoctors(doctors))
+      .then((doctors) => {
+        setDoctors(doctors);
+      })
       .catch(() => alert('Error al obtener los medicos'));
   }, [doctors.length, setDoctors]);
 
   return (
-    <>
+    <React.Fragment>
       <Modal
         title="Agendar Paciente"
         showModal={showModal}
@@ -49,6 +51,17 @@ export default function PatientsPage() {
           doctors={doctors}
           onSubmit={(event) => {
             event.preventDefault();
+
+            if (
+              patient.name.trim() === '' ||
+              patient.date.trim() === '' ||
+              patient.doctor.trim() === '' ||
+              patient.price === 0
+            ) {
+              alert('Todos los campos son requeridos');
+              return;
+            }
+
             setPatients((patients) => [...patients, patient]);
 
             setShowModal(false);
@@ -80,7 +93,7 @@ export default function PatientsPage() {
             <Row>
               <Container className="col-md-12 text-end">
                 <Button
-                  className="btn btn-primary"
+                  className="btn btn-primary col-auto"
                   onClick={() => {
                     setPatient({
                       name: '',
@@ -129,6 +142,6 @@ export default function PatientsPage() {
           </Container>
         </section>
       </main>
-    </>
+    </React.Fragment>
   );
 }
