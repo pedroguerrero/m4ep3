@@ -16,3 +16,10 @@ docker-compose up
 ```
 
 Luego ir a la siguiente url [http://localhost:8080](http://localhost:8080) para visualizar el sitio
+
+Integrantes:
+
+- Pedro Guerrero
+- Bastian Ortega
+- Fernanda Avello
+- Matias Espinoza
